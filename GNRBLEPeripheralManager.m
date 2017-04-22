@@ -37,7 +37,6 @@
 
 //初始化服务
 - (void)setUpServices{
-
     /*
         心跳服务 特征
      */

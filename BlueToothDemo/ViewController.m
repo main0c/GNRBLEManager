@@ -25,7 +25,7 @@ UITableViewDelegate>
     //初始化中心角色
     dicoverdPeripherals = [NSMutableArray array];
 #if 1
-    [[GNRBLECentralManager manager] starScanPeripheralSuccee:^(NSMutableArray<CBPeripheral *> *peripherals) {
+    [[GNRBLECentralManager manager] starScanPeripheralSuccee:^(NSMutableArray<GNRPeripheral *> *peripherals) {
         dicoverdPeripherals = peripherals.mutableCopy;
         [self.tableView reloadData];
     } error:^(NSError *error) {
@@ -64,7 +64,7 @@ UITableViewDelegate>
     [tableView deselectRowAtIndexPath:indexPath animated:YES];
     GNRPeripheral * per = dicoverdPeripherals[indexPath.row];
     
-    [[GNRBLECentralManager manager] connect:per services:@[UUID_Service_Read_ProfileInfo] completion:^(GNRPeripheral *peripheral, NSError *error) {
+    [[GNRBLECentralManager manager] connect:per services:@[UUID_Service_Read_ProfileInfo,UUID_Service_Read_ProfileInfo] completion:^(GNRPeripheral *peripheral, NSError *error) {
         if (error) {
             [self showAlertMsg:error.localizedDescription];
         }else{
@@ -76,24 +76,25 @@ UITableViewDelegate>
 }
 
 - (void)subPer:(GNRPeripheral *)per{
-    [[GNRBLECentralManager manager] notifyCharacteristic:per completion:^(GNRPeripheral *peripheral, NSError *error) {
+    GNRCharacteristic * notifyChara = nil;
+    [[GNRBLECentralManager manager] notifyCharacteristic:per notify_characteristic:notifyChara completion:^(GNRPeripheral *peripheral, NSError *error) {
         if (error) {
             
         }else{
-            NSLog(@"time %@",[[NSString alloc] initWithData:peripheral.notifyChara.value encoding:NSUTF8StringEncoding]);
+            NSLog(@"time %@",[[NSString alloc] initWithData:notifyChara.value encoding:NSUTF8StringEncoding]);
         }
     }];
 }
 
 - (void)scanService:(GNRPeripheral *)per{
-    [[GNRBLECentralManager manager] scanCharacteristicForPeripheral:per serviceUUID:UUID_Service_Read_ProfileInfo characteristicUUID:UUID_Characteristic_NickName discoverServiceCompletion:^(GNRPeripheral *peripheral, NSError *error) {
+    [[GNRBLECentralManager manager] scanCharacteristicForPeripheral:per serviceUUID:UUID_Service_Read_ProfileInfo characteristicUUID:UUID_Characteristic_NickName discoverServiceCompletion:^(GNRService *service, NSError *error) {
         if (error) {
             [self showAlertMsg:error.localizedDescription];
         }else{
             [self showAlertMsg:@"扫描服务成功"];
             
         }
-    } discoverCharacteristicCompletion:^(GNRPeripheral *peripheral, NSError *error) {
+    } discoverCharacteristicCompletion:^(GNRCharacteristic *characteristic, NSError *error) {
         if (error) {
             [self showAlertMsg:error.localizedDescription];
         }else{
@@ -106,7 +107,8 @@ UITableViewDelegate>
 }
 
 - (void)readValue:(GNRPeripheral *)per{
-    [[GNRBLECentralManager manager]readValueForPeripheral:per characteristicUUID:UUID_Characteristic_NickName completion:^(id result, NSError *error) {
+    GNRCharacteristic * notifyChara = nil;
+    [[GNRBLECentralManager manager]readValueForPeripheral:per characteristic:notifyChara completion:^(id result, NSError *error) {
         if (error) {
             [self showAlertMsg:error.localizedDescription];
         }else{

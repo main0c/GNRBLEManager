@@ -34,13 +34,13 @@ typedef void(^GNRBLEScanErrorBlock)(NSError * error);
 //连接到指定的外设
 typedef void(^GNRBLEConnectCompletion)(GNRPeripheral * peripheral,NSError * error);
 //搜索到该外设的指定的服务
-typedef void(^GNRBLEDiscoverServiceCompletion)(GNRPeripheral * peripheral,NSError * error);
+typedef void(^GNRBLEDiscoverServiceCompletion)(GNRService * service,NSError * error);
 //搜索到该外设的指定服务的指定特征
-typedef void(^GNRBLEDiscoverCharacteristicCompletion)(GNRPeripheral * peripheral,NSError * error);
+typedef void(^GNRBLEDiscoverCharacteristicCompletion)(GNRCharacteristic * characteristic,NSError * error);
 //读外设的特征值回调
 typedef void(^GNRBLEReadCharacteristicCompletion)(id result,NSError * error);
 //订阅设备的通知
-typedef void(^GNRBLENotifyCompletion)(GNRPeripheral * peripheral,NSError * error);
+typedef void(^GNRBLENotifyCompletion)(id value,NSError * error);
 
 /********
  

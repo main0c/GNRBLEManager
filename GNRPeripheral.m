@@ -83,9 +83,9 @@
     return nil;
 }
 
-- (void)addService:(CBService *)service{
+- (GNRService *)addService:(CBService *)service{
     if (service==nil) {
-        return;
+        return nil;
     }
     GNRService * cSer = [self isExsit:service];
     if (cSer==nil) {
@@ -95,6 +95,7 @@
     }else{
         cSer.service = service;
     }
+    return cSer;
 }
 
 - (void)removeService:(CBService *)service{

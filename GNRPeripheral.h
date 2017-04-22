@@ -39,7 +39,7 @@
 
 @property (nonatomic, strong, readonly)NSMutableArray <GNRService *>*services;//设备的所有服务缓存
 
-- (void)addService:(CBService *)service;
+- (GNRService *)addService:(CBService *)service;
 - (void)removeService:(CBService *)service;
 - (GNRService *)isExsit:(CBService *)service;
 
@@ -52,7 +52,6 @@
 @property (nonatomic, strong)CBPeripheral * peripheral;
 
 @property (nonatomic, strong)GNRServiceStore * serviceStore;//服务 的缓存
-@property (nonatomic, strong)GNRCharacteristic * notifyChara;//通知的特征
 
 //更新该特征的缓存值
 - (GNRCharacteristic *)updateValue:(id)value characteristic:(CBCharacteristic *)characteristic;

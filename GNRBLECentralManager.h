@@ -27,19 +27,19 @@
  @param errorBlock 扫描失败的回调
  */
 - (instancetype)starScanPeripheralSuccee:(GNRBLEScanSucceeBlock)block
-                           error:(GNRBLEScanErrorBlock)errorBlock;
+                                   error:(GNRBLEScanErrorBlock)errorBlock;
 
 
 /**
  链接该设备
 
  @param peripheral 需要链接的设备
- @param services 指定的服务数组
+ @param services 该设备所拥有的服务数组
  @param completion 链接设备的回调
  */
 - (instancetype)connect:(GNRPeripheral *)peripheral
-       services:(NSArray <NSString *>*)services
-     completion:(GNRBLEConnectCompletion)completion;
+               services:(NSArray <NSString *>*)services
+             completion:(GNRBLEConnectCompletion)completion;
 
 
 /**
@@ -52,25 +52,26 @@
  @param discoverCharacteristicCompletion 扫描到改特征的回调
  */
 - (instancetype)scanCharacteristicForPeripheral:(GNRPeripheral *)peripheral
-                            serviceUUID:(NSString *)serviceUUID
-                     characteristicUUID:(NSString *)characteristicUUID
-              discoverServiceCompletion:(GNRBLEDiscoverServiceCompletion)completion
-       discoverCharacteristicCompletion:(GNRBLEDiscoverCharacteristicCompletion)discoverCharacteristicCompletion;
+                                    serviceUUID:(NSString *)serviceUUID
+                             characteristicUUID:(NSString *)characteristicUUID
+                      discoverServiceCompletion:(GNRBLEDiscoverServiceCompletion)completion
+               discoverCharacteristicCompletion:(GNRBLEDiscoverCharacteristicCompletion)discoverCharacteristicCompletion;
 
 
 /**
  读取特征值
  
  @param peripheral 该设备
- @param characteristicUUID 该特征UUID
+ @param characteristic 该特征
  @param completion 读取到该特征值的回调
  */
 - (instancetype)readValueForPeripheral:(GNRPeripheral *)peripheral
-            characteristicUUID:(NSString *)characteristicUUID
-                    completion:(GNRBLEReadCharacteristicCompletion)completion;
+                        characteristic:(GNRCharacteristic *)characteristic
+                            completion:(GNRBLEReadCharacteristicCompletion)completion;
 
-//订阅该设备的通知
+//订阅该设备的心跳服务
 - (instancetype)notifyCharacteristic:(GNRPeripheral *)per
+                      notify_characteristic:(GNRCharacteristic *)notify_characteristic
                           completion:(GNRBLENotifyCompletion)notifyCompletion;
 
 
