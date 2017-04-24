@@ -43,6 +43,8 @@
 - (void)removeService:(CBService *)service;
 - (GNRService *)isExsit:(CBService *)service;
 
+- (GNRCharacteristic *)characteristicForServiceUUID:(NSString *)serviceUUID characteristicUUID:(NSString *)characteristicUUID;
+
 @end
 
 @interface GNRPeripheral : NSObject
@@ -51,8 +53,14 @@
 @property (nonatomic, copy, readonly)NSString * identifier;
 @property (nonatomic, strong)CBPeripheral * peripheral;
 
-@property (nonatomic, strong)GNRServiceStore * serviceStore;//服务 的缓存
+@property (nonatomic, copy)NSString * checkServiceUUID;
+@property (nonatomic, copy)NSString * checkCharaUUID;
 
+@property (nonatomic, strong)GNRServiceStore * serviceStore;//服务的数据中心
+@property (nonatomic, strong)GNRService * notifyService;
+@property (nonatomic, strong)GNRCharacteristic * notifyCharacteristic;
+
+- (BOOL)isNotifyCharacteristic:(NSString *)charaUUID;
 //更新该特征的缓存值
 - (GNRCharacteristic *)updateValue:(id)value characteristic:(CBCharacteristic *)characteristic;
 

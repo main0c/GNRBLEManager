@@ -7,8 +7,8 @@
 //
 
 #import "ViewController.h"
-#import "GNRBLECentralManager.h"
-#import "GNRBLEPeripheralManager.h"
+#import "GNRBELCentralManager.h"
+#import "GNRBELPeripheralManager.h"
 
 @interface ViewController ()<UITableViewDataSource,
 UITableViewDelegate>
@@ -24,8 +24,9 @@ UITableViewDelegate>
     [super viewDidLoad];
     //初始化中心角色
     dicoverdPeripherals = [NSMutableArray array];
+    GNRBELCentralManager * manager = [GNRBELCentralManager manager];
 #if 1
-    [[GNRBLECentralManager manager] starScanPeripheralSuccee:^(NSMutableArray<GNRPeripheral *> *peripherals) {
+    [manager starScanPeripheralForServices:@[UUID_Service_Read_ProfileInfo,UUID_Service_Notify_HeartRate] succee:^(NSMutableArray<GNRPeripheral *> *peripherals) {
         dicoverdPeripherals = peripherals.mutableCopy;
         [self.tableView reloadData];
     } error:^(NSError *error) {
@@ -33,8 +34,25 @@ UITableViewDelegate>
             [self showAlertMsg:error.domain];
         }
     }];
+    
+    manager.discoverServiceCompletion = ^(GNRPeripheral * peripheral,GNRService * service,NSError * error){
+        if (error) {
+            
+        }else{
+            
+        }
+    };
+    
+    manager.characteristicCompletion = ^(GNRPeripheral * peripheral,GNRCharacteristic * chara,NSError * error){
+        if (error) {
+            
+        }else{
+            
+        }
+    };
+    
 #else
-    [[GNRBLEPeripheralManager manager] openPeripheralSuccee:^(CBPeripheralManager *perManager) {
+    [[GNRBELPeripheralManager manager] openPeripheralSuccee:^(CBPeripheralManager *perManager) {
        self.title = @"开始广播";
     } error:^(NSError *error) {
         if (error) {
@@ -63,52 +81,28 @@ UITableViewDelegate>
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath{
     [tableView deselectRowAtIndexPath:indexPath animated:YES];
     GNRPeripheral * per = dicoverdPeripherals[indexPath.row];
-    
-    [[GNRBLECentralManager manager] connect:per services:@[UUID_Service_Read_ProfileInfo,UUID_Service_Read_ProfileInfo] completion:^(GNRPeripheral *peripheral, NSError *error) {
+    [[GNRBELCentralManager manager] connectForPeripheral:per completion:^(GNRPeripheral *peripheral, NSError *error) {
         if (error) {
-            [self showAlertMsg:error.localizedDescription];
+            
         }else{
-            [self showAlertMsg:@"链接成功"];
-            [self scanService:peripheral];
+            
         }
     }];
-    
 }
 
 - (void)subPer:(GNRPeripheral *)per{
-    GNRCharacteristic * notifyChara = nil;
-    [[GNRBLECentralManager manager] notifyCharacteristic:per notify_characteristic:notifyChara completion:^(GNRPeripheral *peripheral, NSError *error) {
+    [[GNRBELCentralManager manager] notifyPeripheral:per completion:^(GNRPeripheral *peripheral, NSError *error) {
         if (error) {
             
         }else{
-            NSLog(@"time %@",[[NSString alloc] initWithData:notifyChara.value encoding:NSUTF8StringEncoding]);
+            NSLog(@"time %@",[[NSString alloc] initWithData:peripheral.notifyCharacteristic.value encoding:NSUTF8StringEncoding]);
         }
     }];
 }
 
-- (void)scanService:(GNRPeripheral *)per{
-    [[GNRBLECentralManager manager] scanCharacteristicForPeripheral:per serviceUUID:UUID_Service_Read_ProfileInfo characteristicUUID:UUID_Characteristic_NickName discoverServiceCompletion:^(GNRService *service, NSError *error) {
-        if (error) {
-            [self showAlertMsg:error.localizedDescription];
-        }else{
-            [self showAlertMsg:@"扫描服务成功"];
-            
-        }
-    } discoverCharacteristicCompletion:^(GNRCharacteristic *characteristic, NSError *error) {
-        if (error) {
-            [self showAlertMsg:error.localizedDescription];
-        }else{
-            [self showAlertMsg:@"扫描特征成功"];
-            [self readValue:per];
-//            [self subPer:peripheral];
-
-        }
-    }];
-}
 
 - (void)readValue:(GNRPeripheral *)per{
-    GNRCharacteristic * notifyChara = nil;
-    [[GNRBLECentralManager manager]readValueForPeripheral:per characteristic:notifyChara completion:^(id result, NSError *error) {
+    [[GNRBELCentralManager manager] readValueForPeripheral:per completion:^(id result, NSError *error) {
         if (error) {
             [self showAlertMsg:error.localizedDescription];
         }else{

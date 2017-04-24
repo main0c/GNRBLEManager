@@ -17,32 +17,20 @@
  7. 断开连接(disconnect)
  */
 
-#import "GNRBLECentralManager.h"
+#import "GNRBELCentralManager.h"
 
-@interface GNRBLECentralManager ()<CBCentralManagerDelegate,CBPeripheralDelegate>
+@interface GNRBELCentralManager ()<CBCentralManagerDelegate,CBPeripheralDelegate>
 
 @property (nonatomic, strong)NSMutableArray <CBUUID *>* serivices;//当前搜索的serviceUUIDs
-
-@property (nonatomic, strong)CBUUID * currentServiceUUID;
-@property (nonatomic, strong)CBUUID * currentCharacteristicUUID;
-
-@property (nonatomic, copy)GNRBLEScanSucceeBlock scanBlock;
-@property (nonatomic, copy)GNRBLEScanErrorBlock errorBlock;
-@property (nonatomic, copy)GNRBLEConnectCompletion connectCompletion;
-
-@property (nonatomic, copy)GNRBLEDiscoverServiceCompletion discoverServiceCompletion;
-@property (nonatomic, copy)GNRBLEDiscoverCharacteristicCompletion characteristicCompletion;
-@property (nonatomic, copy)GNRBLEReadCharacteristicCompletion readValueCompletion;
-@property (nonatomic, copy)GNRBLENotifyCompletion notifyCompletion;
 @property (nonatomic, strong)CBCentralManager * centralManager;//设备中心管理者
 @property (nonatomic, strong)NSMutableArray <GNRPeripheral *>* peripherals;//外设
 
 @end
 
-@implementation GNRBLECentralManager
+@implementation GNRBELCentralManager
 
 + (instancetype)manager{
-    static GNRBLECentralManager *manager = nil;
+    static GNRBELCentralManager *manager = nil;
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
         manager = [[self alloc] init];
@@ -65,41 +53,46 @@
     return _peripherals;
 }
 
+- (void)setup{
+    _centralManager = [[CBCentralManager alloc]initWithDelegate:self queue:nil];
+}
+
 //扫描
-- (instancetype)starScanPeripheralSuccee:(GNRBLEScanSucceeBlock)block error:(GNRBLEScanErrorBlock)errorBlock{
+- (instancetype)starScanPeripheralForServices:(NSArray <NSString *>*)services
+                                       succee:(GNRBELScanSucceeBlock)block
+                                        error:(GNRBELScanErrorBlock)errorBlock{
     _scanBlock = nil;
     _scanBlock = [block copy];
     _errorBlock = nil;
     _errorBlock = [errorBlock copy];
+    _serivices = [NSMutableArray array];
+    [services enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+        if ([obj length]) {
+            CBUUID* UUID = [CBUUID UUIDWithString:obj];
+            [_serivices addObject:UUID];
+        }
+    }];
     [self setup];
     return self;
 }
 
-//链接该设备
-- (instancetype)connect:(GNRPeripheral *)peripheral
-       services:(NSArray <NSString *>*)services
-     completion:(GNRBLEConnectCompletion)completion{
-    _connectCompletion = nil;
-    _connectCompletion = [completion copy];
-    [self connect:peripheral.peripheral services:services];
-    return self;
+- (BOOL)isExsitForServiceUUID:(NSString *)UUID{
+    for (CBUUID * uu in self.serivices) {
+        if ([UUID isEqualToString:uu.UUIDString]) {
+            return YES;
+        }
+    }
+    return NO;
 }
 
-/**
- 扫描特征
- */
-- (instancetype)scanCharacteristicForPeripheral:(GNRPeripheral *)peripheral
-                            serviceUUID:(NSString *)serviceUUID
-                     characteristicUUID:(NSString *)characteristicUUID
-              discoverServiceCompletion:(GNRBLEDiscoverServiceCompletion)completion
-       discoverCharacteristicCompletion:(GNRBLEDiscoverCharacteristicCompletion)discoverCharacteristicCompletion{
-    _discoverServiceCompletion = nil;
-    _discoverServiceCompletion = [completion copy];
-    _characteristicCompletion = nil;
-    _characteristicCompletion = [discoverCharacteristicCompletion copy];
-    _currentServiceUUID = [CBUUID UUIDWithString:serviceUUID];
-    _currentCharacteristicUUID = [CBUUID UUIDWithString:characteristicUUID];
-    [self sacnServicesForPeripheral:peripheral];
+//链接该设备
+- (instancetype)connectForPeripheral:(GNRPeripheral *)peripheral
+                          completion:(GNRBELConnectBlock)connectBlock{
+    _connectBlock = nil;
+    _connectBlock = [connectBlock copy];
+    if (peripheral.peripheral) {
+        [self.centralManager connectPeripheral:peripheral.peripheral options:nil];
+    }
     return self;
 }
 
@@ -107,18 +100,15 @@
  读取特征值
  */
 - (instancetype)readValueForPeripheral:(GNRPeripheral *)peripheral
-                        characteristic:(GNRCharacteristic *)characteristic
-                            completion:(GNRBLEReadCharacteristicCompletion)completion{
+                    completion:(GNRBELReadCharacteristicCompletion)completion;{
     _readValueCompletion = nil;
     _readValueCompletion = [completion copy];
-    if (characteristic) {
-        [peripheral.peripheral readValueForCharacteristic:characteristic.characteristic];//读取特征值
+    GNRCharacteristic * chara = [peripheral.serviceStore characteristicForServiceUUID:peripheral.checkServiceUUID characteristicUUID:peripheral.checkCharaUUID];
+    if (chara) {
+        [peripheral.peripheral readValueForCharacteristic:chara.characteristic];//读取特征值
     }
+    
     return self;
-}
-
-- (void)setup{
-    _centralManager = [[CBCentralManager alloc]initWithDelegate:self queue:nil];
 }
 
 //扫描设备
@@ -127,52 +117,25 @@
     [self.centralManager scanForPeripheralsWithServices:_serivices options:nil];
 }
 
-//连接设备
-- (void)connect:(CBPeripheral*)peripheral services:(NSArray *)services{
-    _serivices = [NSMutableArray array];
-    [services enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-        if ([obj length]) {
-            CBUUID* UUID = [CBUUID UUIDWithString:obj];
-            [_serivices addObject:UUID];
-        }
-    }];
-    [self.centralManager connectPeripheral:peripheral options:nil];
-}
-
-//扫描服务
-- (void)sacnServicesForPeripheral:(GNRPeripheral *)peripheral{
-    if (_currentServiceUUID) {
-        [peripheral.peripheral setDelegate:self];
-        [peripheral.peripheral discoverServices:@[_currentServiceUUID]];
-    }
-}
-
-
 //扫描特征
-- (void)scanCharacteristicForPeripheral:(CBPeripheral *)peripheral service:(CBService *)service{
-    if (_currentCharacteristicUUID) {
-        [peripheral discoverCharacteristics:@[_currentCharacteristicUUID] forService:service];
+- (void)discoverCharacteristicsForPeripheral:(GNRPeripheral *)peripheral service:(CBService *)service{
+    if (peripheral.peripheral && service) {
+        [peripheral.peripheral discoverCharacteristics:nil forService:service];
     }
 }
 
 //订阅该设备的通知
-- (instancetype)notifyCharacteristic:(GNRPeripheral *)per
-               notify_characteristic:(GNRCharacteristic *)notify_characteristic
-                          completion:(GNRBLENotifyCompletion)notifyCompletion{
+- (instancetype)notifyPeripheral:(GNRPeripheral *)per
+                      completion:(GNRBELNotifyCompletion)notifyCompletion{
     _notifyCompletion = nil;
     _notifyCompletion = [notifyCompletion copy];
-    [self setNotifyValue:YES peripheral:per notify_characteristic:notify_characteristic];
+    [self setNotifyValue:YES peripheral:per];
     return self;
 }
 
-- (void)setNotifyValue:(BOOL)value peripheral:(GNRPeripheral *)per notify_characteristic:(GNRCharacteristic *)notify_characteristic{
-    if (notify_characteristic) {
-        [per.peripheral setNotifyValue:value forCharacteristic:notify_characteristic.characteristic];
-    }else{
-        if (_notifyCompletion) {
-            NSError * error = [NSError errorWithDomain:@"特征不能为空" code:-1 userInfo:nil];
-            _notifyCompletion(nil,error);
-        }
+- (void)setNotifyValue:(BOOL)value peripheral:(GNRPeripheral *)per{
+    if (per.notifyCharacteristic.characteristic) {
+        [per.peripheral setNotifyValue:value forCharacteristic:per.notifyCharacteristic.characteristic];
     }
 }
 
@@ -251,17 +214,14 @@
 
 #pragma mark - 扫描设备回调
 - (void)centralManager:(CBCentralManager *)central didDiscoverPeripheral:(nonnull CBPeripheral *)peripheral advertisementData:(nonnull NSDictionary<NSString *,id> *)advertisementData RSSI:(nonnull NSNumber *)RSSI{
-    NSLog(@"didDiscoverPeripheral");
-    NSLog(@"peripheral %@ %@",peripheral.name,peripheral.identifier.UUIDString);
     if ([peripheral.name hasPrefix:NamePrefix_Peripheral]&&//名字有指定的前缀
         ![self containsPerModel:peripheral]&&//缓存中不存在
         peripheral) {//peripheral 不为nil
-        GNRPeripheral * perModel = [GNRBLEHelper getNewMyPeripheral:peripheral];
+        GNRPeripheral * perModel = [GNRBELHelper getNewMyPeripheral:peripheral];
         [self.peripherals addObject:perModel];
         if (_scanBlock) {
             _scanBlock(self.peripherals);
         }
-        //自动扫描该设备的service
     }
 }
 
@@ -270,27 +230,27 @@
 - (void)centralManager:(CBCentralManager *)central didConnectPeripheral:(CBPeripheral *)peripheral{
     //连接到改设备
     GNRPeripheral * per = [self getPerModelForPeripheral:peripheral];
-    if (per) {
-        if (_connectCompletion&&per) {
-            _connectCompletion(per,nil);
-        }
+    if (_connectBlock&&per) {
+        _connectBlock(per,nil);
     }
+    [peripheral discoverServices:_serivices];//搜索服务
 }
 
 //连接到Peripheral-失败
 -(void)centralManager:(CBCentralManager *)central didFailToConnectPeripheral:(CBPeripheral *)peripheral error:(NSError *)error{
     //连接失败
     GNRPeripheral * per = [self getPerModelForPeripheral:peripheral];
-    if (per) {
-        if (_connectCompletion&&per) {
-            _connectCompletion(per,error);
-        }
+    if (_connectBlock&&per) {
+        _connectBlock(per,error);
     }
 }
 
 //断开连接Peripheral
 - (void)centralManager:(CBCentralManager *)central didDisconnectPeripheral:(CBPeripheral *)peripheral error:(NSError *)error{
-    NSLog(@">>>外设连接断开连接 %@: %@\n", [peripheral name], [error localizedDescription]);
+    GNRPeripheral * perModel = [self getPerModelForPeripheral:peripheral];
+    if (_disConnectBlock) {
+        _disConnectBlock(perModel,error);
+    }
 }
 
 #pragma mark - 扫描服务回调
@@ -298,19 +258,19 @@
 - (void)peripheral:(CBPeripheral *)peripheral didDiscoverServices:(NSError *)error{
     GNRPeripheral * perModel = [self getPerModelForPeripheral:peripheral];
     if (error){
-        if (_discoverServiceCompletion) {
-            _discoverServiceCompletion(nil,error);
+        if (_discoverServiceCompletion&&perModel) {
+            _discoverServiceCompletion(perModel,nil,error);
         }
         return;
     }
     for (CBService *service in peripheral.services) {
-        if ([service.UUID.UUIDString isEqualToString:_currentServiceUUID.UUIDString]) {
+        if ([self isExsitForServiceUUID:service.UUID.UUIDString]) {
             NSLog(@"服务UUID %@",service.UUID);
             GNRService * serModel = [perModel.serviceStore addService:service];//增加到缓存
-            [self scanCharacteristicForPeripheral:peripheral service:service];
-            if (_discoverServiceCompletion&&serModel) {
-                _discoverServiceCompletion(serModel,nil);
+            if (_discoverServiceCompletion&&perModel) {
+                _discoverServiceCompletion(perModel,serModel,nil);
             }
+            [self discoverCharacteristicsForPeripheral:perModel service:service];
             break;
         }
     }
@@ -320,21 +280,20 @@
 - (void)peripheral:(CBPeripheral *)peripheral didDiscoverCharacteristicsForService:(CBService *)service error:(NSError *)error{
     GNRPeripheral * perModel = [self getPerModelForPeripheral:peripheral];
     if (error){
-        if (_characteristicCompletion) {
-            _characteristicCompletion(nil,error);
+        if (_characteristicCompletion&&perModel) {
+            _characteristicCompletion(perModel,nil,error);
         }
         return;
     }
     for (CBCharacteristic *characteristic in service.characteristics){
         NSLog(@"特征UUID %@",characteristic.UUID.UUIDString);
-        if ([characteristic.UUID.UUIDString isEqualToString:_currentCharacteristicUUID.UUIDString]) {
-            GNRService * serModel = [perModel.serviceStore isExsit:service];
-            GNRCharacteristic * chara = [serModel addCharacteristic:characteristic];
-            if (_characteristicCompletion&&chara) {
-                _characteristicCompletion(chara,nil);
-            }
-            break;
+        GNRService * serModel = [perModel.serviceStore isExsit:service];
+        GNRCharacteristic * chara = [serModel addCharacteristic:characteristic];
+        if (_characteristicCompletion&&perModel) {
+            _characteristicCompletion(perModel,chara,nil);
         }
+        break;
+        
     }
 }
 
@@ -342,21 +301,22 @@
 -(void)peripheral:(CBPeripheral *)peripheral didUpdateValueForCharacteristic:(CBCharacteristic *)characteristic error:(NSError *)error{
     GNRPeripheral * perModel = [self getPerModelForPeripheral:peripheral];
     if (error){
-        if (_readValueCompletion) {
+        if (_readValueCompletion&&perModel) {
             _readValueCompletion(nil,error);
         }
         return;
     }
-    if ([characteristic.UUID.UUIDString isEqualToString:_currentCharacteristicUUID.UUIDString]) {
+    if ([characteristic.UUID.UUIDString isEqualToString:perModel.checkCharaUUID]) {
         NSLog(@"characteristic uuid:%@  value:%@",characteristic.UUID,characteristic.value);
         [perModel updateValue:characteristic.value characteristic:characteristic];//更新值
-        
-        if (_notifyCompletion) {
-            _notifyCompletion(characteristic.value,nil);
-        }
-        
-        if (_readValueCompletion&&perModel) {
+        if (_readValueCompletion) {
             _readValueCompletion(characteristic.value,nil);
+        }
+    }
+    //通知
+    if ([perModel isNotifyCharacteristic:characteristic.UUID.UUIDString]) {
+        if (_notifyCompletion) {
+            _notifyCompletion(perModel,nil);
         }
     }
 }
@@ -367,19 +327,20 @@
 }
 
 #pragma mark - 以下暂时不用以后可以扩展
-////搜索到Characteristic的Descriptors
-//-(void)peripheral:(CBPeripheral *)peripheral didDiscoverDescriptorsForCharacteristic:(CBCharacteristic *)characteristic error:(NSError *)error{
-//    NSLog(@"characteristic uuid:%@",characteristic.UUID);
-//    for (CBDescriptor *d in characteristic.descriptors) {
-//        NSLog(@"Descriptor uuid:%@",d.UUID);
-//    }
-//}
-//
-////获取到Descriptors的值
-//-(void)peripheral:(CBPeripheral *)peripheral didUpdateValueForDescriptor:(CBDescriptor *)descriptor error:(NSError *)error{
-//    //打印出DescriptorsUUID 和value
-//    //这个descriptor都是对于characteristic的描述，一般都是字符串，所以这里我们转换成字符串去解析
-//    NSLog(@"characteristic uuid:%@  value:%@",[NSString stringWithFormat:@"%@",descriptor.UUID],descriptor.value);
-//}
+/*
+//搜索到Characteristic的Descriptors
+-(void)peripheral:(CBPeripheral *)peripheral didDiscoverDescriptorsForCharacteristic:(CBCharacteristic *)characteristic error:(NSError *)error{
+    NSLog(@"characteristic uuid:%@",characteristic.UUID);
+    for (CBDescriptor *d in characteristic.descriptors) {
+        NSLog(@"Descriptor uuid:%@",d.UUID);
+    }
+}
 
+//获取到Descriptors的值
+-(void)peripheral:(CBPeripheral *)peripheral didUpdateValueForDescriptor:(CBDescriptor *)descriptor error:(NSError *)error{
+    //打印出DescriptorsUUID 和value
+    //这个descriptor都是对于characteristic的描述，一般都是字符串，所以这里我们转换成字符串去解析
+    NSLog(@"characteristic uuid:%@  value:%@",[NSString stringWithFormat:@"%@",descriptor.UUID],descriptor.value);
+}
+*/
 @end

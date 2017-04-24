@@ -67,6 +67,19 @@
 
 @implementation GNRServiceStore
 
+- (GNRCharacteristic *)characteristicForServiceUUID:(NSString *)serviceUUID characteristicUUID:(NSString *)characteristicUUID{
+    for (GNRService * service in self.services) {
+        if ([service.service.UUID.UUIDString isEqualToString:serviceUUID]) {
+            for (GNRCharacteristic * chara in service.characteristics) {
+                if ([chara.characteristic.UUID.UUIDString isEqualToString:characteristicUUID]) {
+                    return chara;
+                }
+            }
+        }
+    }
+    return nil;
+}
+
 - (instancetype)init{
     if (self = [super init]) {
         _services = [NSMutableArray array];
@@ -125,6 +138,13 @@
 
 - (NSString *)identifier{
     return self.peripheral.identifier.UUIDString?:@"";
+}
+
+- (BOOL)isNotifyCharacteristic:(NSString *)charaUUID{
+    if (charaUUID) {
+        return YES;
+    }
+    return NO;
 }
 
 //更新该特征的缓存值

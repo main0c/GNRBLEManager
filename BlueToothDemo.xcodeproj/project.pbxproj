@@ -16,10 +16,10 @@
 		D91283311EA70D2E00DCA182 /* BlueToothDemoTests.m in Sources */ = {isa = PBXBuildFile; fileRef = D91283301EA70D2E00DCA182 /* BlueToothDemoTests.m */; };
 		D912833C1EA70D2E00DCA182 /* BlueToothDemoUITests.m in Sources */ = {isa = PBXBuildFile; fileRef = D912833B1EA70D2E00DCA182 /* BlueToothDemoUITests.m */; };
 		D912834B1EA70D6C00DCA182 /* CoreBluetooth.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D912834A1EA70D6C00DCA182 /* CoreBluetooth.framework */; };
-		D912834E1EA74DB700DCA182 /* GNRBLECentralManager.m in Sources */ = {isa = PBXBuildFile; fileRef = D912834D1EA74DB700DCA182 /* GNRBLECentralManager.m */; };
+		D912834E1EA74DB700DCA182 /* GNRBELCentralManager.m in Sources */ = {isa = PBXBuildFile; fileRef = D912834D1EA74DB700DCA182 /* GNRBELCentralManager.m */; };
 		D9E7C3141EA863B1001012C2 /* GNRPeripheral.m in Sources */ = {isa = PBXBuildFile; fileRef = D9E7C3131EA863B1001012C2 /* GNRPeripheral.m */; };
-		D9E7C3181EA88CD2001012C2 /* GNRBLEPeripheralManager.m in Sources */ = {isa = PBXBuildFile; fileRef = D9E7C3171EA88CD2001012C2 /* GNRBLEPeripheralManager.m */; };
-		D9E7C31B1EA89E86001012C2 /* GNRBLEHelper.m in Sources */ = {isa = PBXBuildFile; fileRef = D9E7C31A1EA89E86001012C2 /* GNRBLEHelper.m */; };
+		D9E7C3181EA88CD2001012C2 /* GNRBELPeripheralManager.m in Sources */ = {isa = PBXBuildFile; fileRef = D9E7C3171EA88CD2001012C2 /* GNRBELPeripheralManager.m */; };
+		D9E7C31B1EA89E86001012C2 /* GNRBELHelper.m in Sources */ = {isa = PBXBuildFile; fileRef = D9E7C31A1EA89E86001012C2 /* GNRBELHelper.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -57,15 +57,15 @@
 		D912833B1EA70D2E00DCA182 /* BlueToothDemoUITests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = BlueToothDemoUITests.m; sourceTree = "<group>"; };
 		D912833D1EA70D2E00DCA182 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		D912834A1EA70D6C00DCA182 /* CoreBluetooth.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreBluetooth.framework; path = System/Library/Frameworks/CoreBluetooth.framework; sourceTree = SDKROOT; };
-		D912834C1EA74DB700DCA182 /* GNRBLECentralManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GNRBLECentralManager.h; sourceTree = "<group>"; };
-		D912834D1EA74DB700DCA182 /* GNRBLECentralManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GNRBLECentralManager.m; sourceTree = "<group>"; };
+		D912834C1EA74DB700DCA182 /* GNRBELCentralManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GNRBELCentralManager.h; sourceTree = "<group>"; };
+		D912834D1EA74DB700DCA182 /* GNRBELCentralManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GNRBELCentralManager.m; sourceTree = "<group>"; };
 		D9E7C3121EA863B1001012C2 /* GNRPeripheral.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GNRPeripheral.h; sourceTree = "<group>"; };
 		D9E7C3131EA863B1001012C2 /* GNRPeripheral.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GNRPeripheral.m; sourceTree = "<group>"; };
-		D9E7C3151EA86619001012C2 /* GNRBLEHeader.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = GNRBLEHeader.h; sourceTree = "<group>"; };
-		D9E7C3161EA88CD2001012C2 /* GNRBLEPeripheralManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GNRBLEPeripheralManager.h; sourceTree = "<group>"; };
-		D9E7C3171EA88CD2001012C2 /* GNRBLEPeripheralManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GNRBLEPeripheralManager.m; sourceTree = "<group>"; };
-		D9E7C3191EA89E86001012C2 /* GNRBLEHelper.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GNRBLEHelper.h; sourceTree = "<group>"; };
-		D9E7C31A1EA89E86001012C2 /* GNRBLEHelper.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GNRBLEHelper.m; sourceTree = "<group>"; };
+		D9E7C3151EA86619001012C2 /* GNRBELHeader.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = GNRBELHeader.h; sourceTree = "<group>"; };
+		D9E7C3161EA88CD2001012C2 /* GNRBELPeripheralManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GNRBELPeripheralManager.h; sourceTree = "<group>"; };
+		D9E7C3171EA88CD2001012C2 /* GNRBELPeripheralManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GNRBELPeripheralManager.m; sourceTree = "<group>"; };
+		D9E7C3191EA89E86001012C2 /* GNRBELHelper.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GNRBELHelper.h; sourceTree = "<group>"; };
+		D9E7C31A1EA89E86001012C2 /* GNRBELHelper.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GNRBELHelper.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -97,15 +97,15 @@
 		D912830A1EA70D2E00DCA182 = {
 			isa = PBXGroup;
 			children = (
-				D9E7C3151EA86619001012C2 /* GNRBLEHeader.h */,
-				D912834C1EA74DB700DCA182 /* GNRBLECentralManager.h */,
-				D912834D1EA74DB700DCA182 /* GNRBLECentralManager.m */,
-				D9E7C3161EA88CD2001012C2 /* GNRBLEPeripheralManager.h */,
-				D9E7C3171EA88CD2001012C2 /* GNRBLEPeripheralManager.m */,
+				D9E7C3151EA86619001012C2 /* GNRBELHeader.h */,
+				D912834C1EA74DB700DCA182 /* GNRBELCentralManager.h */,
+				D912834D1EA74DB700DCA182 /* GNRBELCentralManager.m */,
+				D9E7C3161EA88CD2001012C2 /* GNRBELPeripheralManager.h */,
+				D9E7C3171EA88CD2001012C2 /* GNRBELPeripheralManager.m */,
 				D9E7C3121EA863B1001012C2 /* GNRPeripheral.h */,
 				D9E7C3131EA863B1001012C2 /* GNRPeripheral.m */,
-				D9E7C3191EA89E86001012C2 /* GNRBLEHelper.h */,
-				D9E7C31A1EA89E86001012C2 /* GNRBLEHelper.m */,
+				D9E7C3191EA89E86001012C2 /* GNRBELHelper.h */,
+				D9E7C31A1EA89E86001012C2 /* GNRBELHelper.m */,
 				D91283151EA70D2E00DCA182 /* BlueToothDemo */,
 				D912832F1EA70D2E00DCA182 /* BlueToothDemoTests */,
 				D912833A1EA70D2E00DCA182 /* BlueToothDemoUITests */,
@@ -308,9 +308,9 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				D912834E1EA74DB700DCA182 /* GNRBLECentralManager.m in Sources */,
-				D9E7C31B1EA89E86001012C2 /* GNRBLEHelper.m in Sources */,
-				D9E7C3181EA88CD2001012C2 /* GNRBLEPeripheralManager.m in Sources */,
+				D912834E1EA74DB700DCA182 /* GNRBELCentralManager.m in Sources */,
+				D9E7C31B1EA89E86001012C2 /* GNRBELHelper.m in Sources */,
+				D9E7C3181EA88CD2001012C2 /* GNRBELPeripheralManager.m in Sources */,
 				D9E7C3141EA863B1001012C2 /* GNRPeripheral.m in Sources */,
 				D912831E1EA70D2E00DCA182 /* ViewController.m in Sources */,
 				D912831B1EA70D2E00DCA182 /* AppDelegate.m in Sources */,
