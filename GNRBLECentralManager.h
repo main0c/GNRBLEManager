@@ -26,6 +26,10 @@
 @property (nonatomic, copy)GNRBLEReadCharacteristicCompletion readValueCompletion;
 @property (nonatomic, copy)GNRBLENotifyCompletion notifyCompletion;
 
+@property (nonatomic, strong)NSMutableArray <CBUUID *>* serivices;//当前搜索的serviceUUIDs
+@property (nonatomic, strong)CBCentralManager * centralManager;//设备中心管理者
+@property (nonatomic, strong)NSMutableArray <GNRPeripheral *>* peripherals;//外设
+
 + (instancetype)manager;
 
 

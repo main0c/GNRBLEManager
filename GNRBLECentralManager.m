@@ -21,9 +21,7 @@
 
 @interface GNRBLECentralManager ()<CBCentralManagerDelegate,CBPeripheralDelegate>
 
-@property (nonatomic, strong)NSMutableArray <CBUUID *>* serivices;//当前搜索的serviceUUIDs
-@property (nonatomic, strong)CBCentralManager * centralManager;//设备中心管理者
-@property (nonatomic, strong)NSMutableArray <GNRPeripheral *>* peripherals;//外设
+
 
 @end
 
@@ -271,16 +269,22 @@
 //断开连接Peripheral
 - (void)centralManager:(CBCentralManager *)central didDisconnectPeripheral:(CBPeripheral *)peripheral error:(NSError *)error{
     GNRPeripheral * perModel = [self getPerModelForPeripheral:peripheral];
-    if (error) {
-        if (_disConnectBlock) {
-            _disConnectBlock(perModel,error);
-        }
-    }else{
-        if (_disConnectBlock) {
-            _disConnectBlock(perModel,nil);
-        }
+    //删除这个perModel
+    [self clearDisConnectPer:perModel];
+    if (_disConnectBlock) {
+        _disConnectBlock(perModel,error);
     }
 }
+
+- (void)clearDisConnectPer:(GNRPeripheral *)per{
+    if (per) {//删除无效的设备
+        [self setNotifyValue:NO peripheral:per];
+        per.peripheral.delegate = nil;
+        per.peripheral = nil;
+        [_peripherals removeObject:per];
+    }
+}
+
 
 #pragma mark - 扫描服务回调
 //扫描到服务

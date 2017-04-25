@@ -61,8 +61,6 @@
 @property (nonatomic, strong)GNRService * notifyService;
 @property (nonatomic, strong)GNRCharacteristic * notifyCharacteristic;
 
-@property (nonatomic, assign)BOOL connectState;//是否连接？
-
 - (BOOL)isNotifyCharacteristic:(NSString *)charaUUID;
 //更新该特征的缓存值
 - (GNRCharacteristic *)updateValue:(id)value characteristic:(CBCharacteristic *)characteristic;

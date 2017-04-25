@@ -11,9 +11,7 @@
 @interface GNRBLEPeripheralManager ()<CBPeripheralManagerDelegate>
 @property (nonatomic, strong)NSTimer * timer;
 @property (nonatomic, assign)NSInteger serviceCount;
-@property (nonatomic, strong)CBPeripheralManager * peripheralManger;//外设管理者
 @property (nonatomic, strong)NSString * perName;
-@property (nonatomic, strong)NSString * name;//设备名字
 
 @property (nonatomic, copy)GNRBLEOpenPeripheralSucceeBlock openSucceeBlock;
 @property (nonatomic, copy)GNRBLEOpenPeripheralErrorBlock openErrorBlock;
@@ -71,6 +69,15 @@
         return [NSString stringWithFormat:@"%@%@",name,nickName];
     }
     return name;
+}
+
+- (void)stopService{
+    [_peripheralManger removeAllServices];
+    [self.peripheralManger stopAdvertising];
+}
+
+- (void)stopAdvertising{
+    [self.peripheralManger stopAdvertising];
 }
 
 //开始广播
@@ -143,7 +150,9 @@
     }
     if (_serviceCount==2) {
         //添加两个服务后才开始广播
-        [self startAdvertising];
+        if (_openSucceeBlock) {
+            _openSucceeBlock(peripheral);
+        }
     }
     NSLog(@"didAddService");
 }
@@ -153,9 +162,7 @@
     if (error) {
         NSLog(@"error %@",error.localizedDescription);
     }else{
-        if (_openSucceeBlock) {
-            _openSucceeBlock(peripheral);
-        }
+        
     }
     NSLog(@"advertisiong");
 }

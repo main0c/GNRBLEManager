@@ -38,8 +38,15 @@
                             <constraint firstItem="RV6-8K-Ulu" firstAttribute="top" secondItem="8bC-Xf-vdC" secondAttribute="top" id="dPX-ys-FjQ"/>
                         </constraints>
                     </view>
-                    <navigationItem key="navigationItem" title="蓝牙" id="k6h-c1-yrn"/>
+                    <navigationItem key="navigationItem" title="蓝牙" id="k6h-c1-yrn">
+                        <barButtonItem key="rightBarButtonItem" title="开始广播" id="cbO-SK-2oM">
+                            <connections>
+                                <action selector="itemAction:" destination="BYZ-38-t0r" id="c7T-6a-1MP"/>
+                            </connections>
+                        </barButtonItem>
+                    </navigationItem>
                     <connections>
+                        <outlet property="item" destination="cbO-SK-2oM" id="nvH-3t-reh"/>
                         <outlet property="tableView" destination="RV6-8K-Ulu" id="OqY-At-WDZ"/>
                     </connections>
                 </viewController>

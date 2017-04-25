@@ -15,7 +15,12 @@ UITableViewDelegate>
 {
     NSMutableArray * dicoverdPeripherals;//已发现的设备
 }
+
 @property (weak, nonatomic) IBOutlet UITableView *tableView;
+@property (weak, nonatomic) IBOutlet UIBarButtonItem *item;
+
+- (IBAction)itemAction:(id)sender;
+
 @end
 
 @implementation ViewController
@@ -33,13 +38,6 @@ UITableViewDelegate>
             [self showAlertMsg:error.domain];
         }
     }];
-    
-    [[GNRBLEPeripheralManager manager] openPeripheralForName:@"" succee:^(CBPeripheralManager *perManager) {
-        self.title = @"开始广播";
-
-    } error:^(NSError *error) {
-        NSLog(@"open error %@",error.localizedDescription);
-    }];
 
 }
 
@@ -54,12 +52,11 @@ UITableViewDelegate>
             NSLog(@"connect peripheral UUID %@",peripheral.identifier);
         }
     } disconnectCompletion:^(GNRPeripheral *peripheral, NSError *error) {
-        if (error) {
-            NSLog(@"disconncet error %@",error.localizedDescription);
-        }else{
-            NSLog(@"disconnect peripheral UUID %@",peripheral.identifier);
-            peripheral.connectState = NO;
-        }
+        
+        NSLog(@"disconnect peripheral UUID %@",peripheral.identifier);
+        dicoverdPeripherals = [GNRBLECentralManager manager].peripherals;
+        [self.tableView reloadData];
+        
     }];
     
     //扫描到特征的回调
@@ -77,8 +74,6 @@ UITableViewDelegate>
             }
         }
     };
-    
-    
 }
 
 //读取特征值
@@ -98,8 +93,7 @@ UITableViewDelegate>
         if (error) {
             NSLog(@"sub notify error %@",error);
         }else{
-            NSLog(@"sub notify value %@",per.notifyCharacteristic.value);
-            peripheral.connectState = YES;
+            NSLog(@"sub notify value %@ %@",per.identifier,per.notifyCharacteristic.value);
         }
     }];
 }
@@ -126,33 +120,33 @@ UITableViewDelegate>
     [self connect:per];
 }
 
-- (void)subPer:(GNRPeripheral *)per{
-    [[GNRBLECentralManager manager] notifyPeripheral:per completion:^(GNRPeripheral *peripheral, NSError *error) {
-        if (error) {
-            
-        }else{
-            NSLog(@"time %@",[[NSString alloc] initWithData:peripheral.notifyCharacteristic.value encoding:NSUTF8StringEncoding]);
-        }
-    }];
-}
-
-
-- (void)readValue:(GNRPeripheral *)per{
-    [[GNRBLECentralManager manager] readValueForPeripheral:per completion:^(id result, NSError *error) {
-        if (error) {
-            [self showAlertMsg:error.localizedDescription];
-        }else{
-            [self showAlertMsg:@"读取特征值成功"];
-            NSLog(@"DATA %@",[[NSString alloc] initWithData:result encoding:NSUTF8StringEncoding]);
-            [self.tableView reloadData];
-        }
-    }];
-}
-
-
 - (void)showAlertMsg:(NSString *)msg{
     UIAlertView * alertV = [[UIAlertView alloc]initWithTitle:msg message:nil delegate:nil cancelButtonTitle:@"知道了" otherButtonTitles: nil];
     [alertV show];
+}
+
+- (IBAction)itemAction:(id)sender {
+    if ([self.item.title isEqualToString:@"开始广播"]) {
+        if ([GNRBLEPeripheralManager manager].peripheralManger) {
+            [[GNRBLEPeripheralManager manager] startAdvertising];
+            self.title = @"开始广播";
+            self.item.title = @"停止广播";
+
+        }else{
+            [[GNRBLEPeripheralManager manager] openPeripheralForName:@"魔笛GNR" succee:^(CBPeripheralManager *perManager) {
+                self.title = @"开始广播";
+                self.item.title = @"停止广播";
+                [[GNRBLEPeripheralManager manager] startAdvertising];
+            } error:^(NSError *error) {
+                NSLog(@"open error %@",error.domain);
+            }];
+        }
+        
+
+    }else{
+        [[GNRBLEPeripheralManager manager]stopService];
+        self.item.title = @"开始广播";
+    }
 }
 
 @end
