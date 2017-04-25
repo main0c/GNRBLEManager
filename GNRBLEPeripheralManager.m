@@ -13,6 +13,7 @@
 @property (nonatomic, assign)NSInteger serviceCount;
 @property (nonatomic, strong)CBPeripheralManager * peripheralManger;//外设管理者
 @property (nonatomic, strong)NSString * perName;
+@property (nonatomic, strong)NSString * name;//设备名字
 
 @property (nonatomic, copy)GNRBLEOpenPeripheralSucceeBlock openSucceeBlock;
 @property (nonatomic, copy)GNRBLEOpenPeripheralErrorBlock openErrorBlock;
@@ -52,7 +53,7 @@
         用户信息服务 特征
      */
     CBUUID * charaUserNameReadUUID = [CBUUID UUIDWithString:UUID_Characteristic_NickName];
-    NSData * data = [@"Fuck" dataUsingEncoding:NSUTF8StringEncoding];
+    NSData * data = [_name dataUsingEncoding:NSUTF8StringEncoding];
     CBMutableCharacteristic *readCharacteristic = [[CBMutableCharacteristic alloc]initWithType:charaUserNameReadUUID properties:CBCharacteristicPropertyRead value:data permissions:CBAttributePermissionsReadable];
 
     CBUUID * serviceProfileInfoUUID = [CBUUID UUIDWithString:UUID_Service_Read_ProfileInfo];
@@ -65,7 +66,7 @@
 
 - (NSString *)perName{
     NSString * name = NamePrefix_Peripheral;
-    NSString * nickName = @"魔笛";
+    NSString * nickName = _name;
     if (nickName.length) {
         return [NSString stringWithFormat:@"%@%@",name,nickName];
     }
@@ -85,7 +86,15 @@
 }
 
 //开启设备回调
-- (void)openPeripheralSuccee:(GNRBLEOpenPeripheralSucceeBlock)succeeBlock error:(GNRBLEOpenPeripheralErrorBlock)errorBlock{
+- (void)openPeripheralForName:(NSString *)name succee:(GNRBLEOpenPeripheralSucceeBlock)succeeBlock error:(GNRBLEOpenPeripheralErrorBlock)errorBlock{
+    _name = name;
+    if (!_name.length) {
+        if (errorBlock) {
+            NSError * error = [NSError errorWithDomain:@"请设置设备名称" code:200 userInfo:nil];
+            errorBlock(error);
+        }
+        return;
+    }
     _openSucceeBlock = nil;
     _openSucceeBlock = [succeeBlock copy];
     _openErrorBlock = nil;
@@ -165,11 +174,9 @@
 //发送数据，发送当前时间的秒数
 - (BOOL)sendData:(NSTimer *)t {
     CBMutableCharacteristic *characteristic = t.userInfo;
-    NSDateFormatter *dft = [[NSDateFormatter alloc]init];
-    [dft setDateFormat:@"ss"];
-    NSLog(@"当前时间戳 %@",[dft stringFromDate:[NSDate date]]);
     //执行回应Central通知数据
-    return  [self.peripheralManger updateValue:[[dft stringFromDate:[NSDate date]] dataUsingEncoding:NSUTF8StringEncoding] forCharacteristic:(CBMutableCharacteristic *)characteristic onSubscribedCentrals:nil];
+    id  time = [@([[NSDate date] timeIntervalSince1970]).stringValue dataUsingEncoding:NSUTF8StringEncoding];
+    return  [self.peripheralManger updateValue:time forCharacteristic:(CBMutableCharacteristic *)characteristic onSubscribedCentrals:nil];
     
 }
 //取消了定阅

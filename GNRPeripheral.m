@@ -7,6 +7,7 @@
 //
 
 #import "GNRPeripheral.h"
+#import "GNRBLEHeader.h"
 
 @implementation GNRCharacteristic
 
@@ -141,7 +142,7 @@
 }
 
 - (BOOL)isNotifyCharacteristic:(NSString *)charaUUID{
-    if (charaUUID) {
+    if ([charaUUID isEqualToString:UUID_Characteristic_Notify_Time]) {
         return YES;
     }
     return NO;
@@ -152,12 +153,34 @@
     for (GNRService *ser in _serviceStore.services) {
         for (GNRCharacteristic * chara in ser.characteristics) {
             if ([chara.identifier isEqualToString:characteristic.UUID.UUIDString]) {//找到了
-                chara.value = value;
+                chara.value = [[NSString alloc]initWithData:characteristic.value encoding:NSUTF8StringEncoding];
                 return chara;
             }
         }
     }
     return nil;
+}
+
+//通知的特征
+- (GNRCharacteristic *)notifyCharacteristic{
+    for (GNRService *ser in _serviceStore.services) {
+        if ([ser.identifier isEqualToString:UUID_Service_Notify_HeartRate]) {
+            for (GNRCharacteristic * chara in ser.characteristics) {
+                if ([chara.identifier isEqualToString:UUID_Characteristic_Notify_Time]) {//找到了
+                    return chara;
+                }
+            }
+        }
+    }
+    return nil;
+}
+
+- (NSString *)checkServiceUUID{
+    return UUID_Service_Read_ProfileInfo;
+}
+
+- (NSString *)checkCharaUUID{
+    return UUID_Characteristic_NickName;
 }
 
 @end

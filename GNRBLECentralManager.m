@@ -87,9 +87,12 @@
 
 //链接该设备
 - (instancetype)connectForPeripheral:(GNRPeripheral *)peripheral
-                          completion:(GNRBLEConnectBlock)connectBlock{
+                   connectCompletion:(GNRBLEConnectBlock)connectBlock
+                disconnectCompletion:(GNRBLEDisConnectBlock)disconnectBlock{
     _connectBlock = nil;
     _connectBlock = [connectBlock copy];
+    _disConnectBlock = nil;
+    _disConnectBlock = [disconnectBlock copy];
     if (peripheral.peripheral) {
         [self.centralManager connectPeripheral:peripheral.peripheral options:nil];
     }
@@ -101,6 +104,13 @@
  */
 - (instancetype)readValueForPeripheral:(GNRPeripheral *)peripheral
                     completion:(GNRBLEReadCharacteristicCompletion)completion;{
+    if (!(peripheral.checkServiceUUID&&peripheral.checkServiceUUID)) {
+        if (completion) {
+            NSError * error = [NSError errorWithDomain:@"未设置特征UUID及所属服务的UUID" code:200 userInfo:nil];
+            completion(nil,error);
+        }
+        return self;
+    }
     _readValueCompletion = nil;
     _readValueCompletion = [completion copy];
     GNRCharacteristic * chara = [peripheral.serviceStore characteristicForServiceUUID:peripheral.checkServiceUUID characteristicUUID:peripheral.checkCharaUUID];
@@ -114,7 +124,7 @@
 //扫描设备
 - (void)scanForPeripherals{
     //扫描有指定服务的设备
-    [self.centralManager scanForPeripheralsWithServices:_serivices options:nil];
+    [self.centralManager scanForPeripheralsWithServices:_serivices?:nil options:nil];
 }
 
 //扫描特征
@@ -136,6 +146,11 @@
 - (void)setNotifyValue:(BOOL)value peripheral:(GNRPeripheral *)per{
     if (per.notifyCharacteristic.characteristic) {
         [per.peripheral setNotifyValue:value forCharacteristic:per.notifyCharacteristic.characteristic];
+    }else{
+        if (_notifyCompletion) {
+            NSError * error = [NSError errorWithDomain:@"未获取到该特征" code:200 userInfo:nil];
+            _notifyCompletion(per,error);
+        }
     }
 }
 
@@ -212,6 +227,14 @@
     return isExsit;
 }
 
+//扫描该设备下的所有服务
+- (void)scanServicesForPeripheral:(GNRPeripheral *)per{
+    if (per.peripheral) {
+        [per.peripheral setDelegate:self];
+        [per.peripheral discoverServices:_serivices?:nil];//搜索服务
+    }
+}
+
 #pragma mark - 扫描设备回调
 - (void)centralManager:(CBCentralManager *)central didDiscoverPeripheral:(nonnull CBPeripheral *)peripheral advertisementData:(nonnull NSDictionary<NSString *,id> *)advertisementData RSSI:(nonnull NSNumber *)RSSI{
     if ([peripheral.name hasPrefix:NamePrefix_Peripheral]&&//名字有指定的前缀
@@ -233,7 +256,7 @@
     if (_connectBlock&&per) {
         _connectBlock(per,nil);
     }
-    [peripheral discoverServices:_serivices];//搜索服务
+    [self scanServicesForPeripheral:per];
 }
 
 //连接到Peripheral-失败
@@ -248,8 +271,14 @@
 //断开连接Peripheral
 - (void)centralManager:(CBCentralManager *)central didDisconnectPeripheral:(CBPeripheral *)peripheral error:(NSError *)error{
     GNRPeripheral * perModel = [self getPerModelForPeripheral:peripheral];
-    if (_disConnectBlock) {
-        _disConnectBlock(perModel,error);
+    if (error) {
+        if (_disConnectBlock) {
+            _disConnectBlock(perModel,error);
+        }
+    }else{
+        if (_disConnectBlock) {
+            _disConnectBlock(perModel,nil);
+        }
     }
 }
 
@@ -265,13 +294,11 @@
     }
     for (CBService *service in peripheral.services) {
         if ([self isExsitForServiceUUID:service.UUID.UUIDString]) {
-            NSLog(@"服务UUID %@",service.UUID);
             GNRService * serModel = [perModel.serviceStore addService:service];//增加到缓存
             if (_discoverServiceCompletion&&perModel) {
                 _discoverServiceCompletion(perModel,serModel,nil);
             }
             [self discoverCharacteristicsForPeripheral:perModel service:service];
-            break;
         }
     }
 }
@@ -286,14 +313,11 @@
         return;
     }
     for (CBCharacteristic *characteristic in service.characteristics){
-        NSLog(@"特征UUID %@",characteristic.UUID.UUIDString);
         GNRService * serModel = [perModel.serviceStore isExsit:service];
         GNRCharacteristic * chara = [serModel addCharacteristic:characteristic];
         if (_characteristicCompletion&&perModel) {
             _characteristicCompletion(perModel,chara,nil);
         }
-        break;
-        
     }
 }
 
@@ -307,14 +331,14 @@
         return;
     }
     if ([characteristic.UUID.UUIDString isEqualToString:perModel.checkCharaUUID]) {
-        NSLog(@"characteristic uuid:%@  value:%@",characteristic.UUID,characteristic.value);
-        [perModel updateValue:characteristic.value characteristic:characteristic];//更新值
+        GNRCharacteristic * chara = [perModel updateValue:characteristic.value characteristic:characteristic];//更新值
         if (_readValueCompletion) {
-            _readValueCompletion(characteristic.value,nil);
+            _readValueCompletion(chara.value,nil);
         }
     }
     //通知
     if ([perModel isNotifyCharacteristic:characteristic.UUID.UUIDString]) {
+        [perModel updateValue:characteristic.value characteristic:characteristic];//更新值
         if (_notifyCompletion) {
             _notifyCompletion(perModel,nil);
         }

@@ -20,6 +20,6 @@
 + (instancetype)manager;
 
 //开启设备回调
-- (void)openPeripheralSuccee:(GNRBLEOpenPeripheralSucceeBlock)succeeBlock error:(GNRBLEOpenPeripheralErrorBlock)errorBlock;
+- (void)openPeripheralForName:(NSString *)name succee:(GNRBLEOpenPeripheralSucceeBlock)succeeBlock error:(GNRBLEOpenPeripheralErrorBlock)errorBlock;
 
 @end

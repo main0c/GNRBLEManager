@@ -16,6 +16,7 @@
 #import "GNRBLEHeader.h"
 
 @interface GNRBLECentralManager : NSObject
+
 @property (nonatomic, copy)GNRBLEScanSucceeBlock scanBlock;//扫描成功
 @property (nonatomic, copy)GNRBLEScanErrorBlock errorBlock;//扫描失败
 @property (nonatomic, copy)GNRBLEConnectBlock connectBlock;//连接回调
@@ -24,6 +25,7 @@
 @property (nonatomic, copy)GNRBLEDiscoverCharacteristicCompletion characteristicCompletion;//发现特征
 @property (nonatomic, copy)GNRBLEReadCharacteristicCompletion readValueCompletion;
 @property (nonatomic, copy)GNRBLENotifyCompletion notifyCompletion;
+
 + (instancetype)manager;
 
 
@@ -45,7 +47,8 @@
  @param peripheral 需要扫描的设备
  */
 - (instancetype)connectForPeripheral:(GNRPeripheral *)peripheral
-                          completion:(GNRBLEConnectBlock)connectBlock;
+                   connectCompletion:(GNRBLEConnectBlock)connectBlock
+                disconnectCompletion:(GNRBLEDisConnectBlock)disconnectBlock;
 
 /**
  读取特征值

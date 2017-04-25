@@ -18,8 +18,8 @@
 
 @property (nonatomic, copy, readonly)NSString * identifier;
 @property (nonatomic, strong)CBCharacteristic * characteristic;
-@property (nonatomic, strong)id value;
-@property (nonatomic, strong)id descriptor;
+@property (nonatomic, strong)NSString * value;
+@property (nonatomic, strong)NSString * descriptor;
 
 @end
 
@@ -57,8 +57,11 @@
 @property (nonatomic, copy)NSString * checkCharaUUID;
 
 @property (nonatomic, strong)GNRServiceStore * serviceStore;//服务的数据中心
+
 @property (nonatomic, strong)GNRService * notifyService;
 @property (nonatomic, strong)GNRCharacteristic * notifyCharacteristic;
+
+@property (nonatomic, assign)BOOL connectState;//是否连接？
 
 - (BOOL)isNotifyCharacteristic:(NSString *)charaUUID;
 //更新该特征的缓存值
