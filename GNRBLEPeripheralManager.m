@@ -6,23 +6,23 @@
 //  Copyright © 2017年 UUPaotui. All rights reserved.
 //
 
-#import "GNRBELPeripheralManager.h"
+#import "GNRBLEPeripheralManager.h"
 
-@interface GNRBELPeripheralManager ()<CBPeripheralManagerDelegate>
+@interface GNRBLEPeripheralManager ()<CBPeripheralManagerDelegate>
 @property (nonatomic, strong)NSTimer * timer;
 @property (nonatomic, assign)NSInteger serviceCount;
 @property (nonatomic, strong)CBPeripheralManager * peripheralManger;//外设管理者
 @property (nonatomic, strong)NSString * perName;
 
-@property (nonatomic, copy)GNRBELOpenPeripheralSucceeBlock openSucceeBlock;
-@property (nonatomic, copy)GNRBELOpenPeripheralErrorBlock openErrorBlock;
+@property (nonatomic, copy)GNRBLEOpenPeripheralSucceeBlock openSucceeBlock;
+@property (nonatomic, copy)GNRBLEOpenPeripheralErrorBlock openErrorBlock;
 
 @end
 
-@implementation GNRBELPeripheralManager
+@implementation GNRBLEPeripheralManager
 
 + (instancetype)manager{
-    static GNRBELPeripheralManager *manager = nil;
+    static GNRBLEPeripheralManager *manager = nil;
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
         manager = [[self alloc] init];
@@ -85,7 +85,7 @@
 }
 
 //开启设备回调
-- (void)openPeripheralSuccee:(GNRBELOpenPeripheralSucceeBlock)succeeBlock error:(GNRBELOpenPeripheralErrorBlock)errorBlock{
+- (void)openPeripheralSuccee:(GNRBLEOpenPeripheralSucceeBlock)succeeBlock error:(GNRBLEOpenPeripheralErrorBlock)errorBlock{
     _openSucceeBlock = nil;
     _openSucceeBlock = [succeeBlock copy];
     _openErrorBlock = nil;

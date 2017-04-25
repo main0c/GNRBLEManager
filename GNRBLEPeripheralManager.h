@@ -13,13 +13,13 @@
  ***********/
 
 #import <Foundation/Foundation.h>
-#import "GNRBELHeader.h"
+#import "GNRBLEHeader.h"
 
-@interface GNRBELPeripheralManager : NSObject
+@interface GNRBLEPeripheralManager : NSObject
 
 + (instancetype)manager;
 
 //开启设备回调
-- (void)openPeripheralSuccee:(GNRBELOpenPeripheralSucceeBlock)succeeBlock error:(GNRBELOpenPeripheralErrorBlock)errorBlock;
+- (void)openPeripheralSuccee:(GNRBLEOpenPeripheralSucceeBlock)succeeBlock error:(GNRBLEOpenPeripheralErrorBlock)errorBlock;
 
 @end

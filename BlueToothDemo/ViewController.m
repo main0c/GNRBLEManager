@@ -7,8 +7,8 @@
 //
 
 #import "ViewController.h"
-#import "GNRBELCentralManager.h"
-#import "GNRBELPeripheralManager.h"
+#import "GNRBLECentralManager.h"
+#import "GNRBLEPeripheralManager.h"
 
 @interface ViewController ()<UITableViewDataSource,
 UITableViewDelegate>
@@ -24,7 +24,7 @@ UITableViewDelegate>
     [super viewDidLoad];
     //初始化中心角色
     dicoverdPeripherals = [NSMutableArray array];
-    GNRBELCentralManager * manager = [GNRBELCentralManager manager];
+    GNRBLECentralManager * manager = [GNRBLECentralManager manager];
 #if 1
     [manager starScanPeripheralForServices:@[UUID_Service_Read_ProfileInfo,UUID_Service_Notify_HeartRate] succee:^(NSMutableArray<GNRPeripheral *> *peripherals) {
         dicoverdPeripherals = peripherals.mutableCopy;
@@ -52,7 +52,7 @@ UITableViewDelegate>
     };
     
 #else
-    [[GNRBELPeripheralManager manager] openPeripheralSuccee:^(CBPeripheralManager *perManager) {
+    [[GNRBLEPeripheralManager manager] openPeripheralSuccee:^(CBPeripheralManager *perManager) {
        self.title = @"开始广播";
     } error:^(NSError *error) {
         if (error) {
@@ -81,7 +81,7 @@ UITableViewDelegate>
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath{
     [tableView deselectRowAtIndexPath:indexPath animated:YES];
     GNRPeripheral * per = dicoverdPeripherals[indexPath.row];
-    [[GNRBELCentralManager manager] connectForPeripheral:per completion:^(GNRPeripheral *peripheral, NSError *error) {
+    [[GNRBLECentralManager manager] connectForPeripheral:per completion:^(GNRPeripheral *peripheral, NSError *error) {
         if (error) {
             
         }else{
@@ -91,7 +91,7 @@ UITableViewDelegate>
 }
 
 - (void)subPer:(GNRPeripheral *)per{
-    [[GNRBELCentralManager manager] notifyPeripheral:per completion:^(GNRPeripheral *peripheral, NSError *error) {
+    [[GNRBLECentralManager manager] notifyPeripheral:per completion:^(GNRPeripheral *peripheral, NSError *error) {
         if (error) {
             
         }else{
@@ -102,7 +102,7 @@ UITableViewDelegate>
 
 
 - (void)readValue:(GNRPeripheral *)per{
-    [[GNRBELCentralManager manager] readValueForPeripheral:per completion:^(id result, NSError *error) {
+    [[GNRBLECentralManager manager] readValueForPeripheral:per completion:^(id result, NSError *error) {
         if (error) {
             [self showAlertMsg:error.localizedDescription];
         }else{

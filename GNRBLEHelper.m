@@ -1,14 +1,14 @@
 //
-//  GNRBELHelper.m
+//  GNRBLEHelper.m
 //  BlueToothDemo
 //
 //  Created by LvYuan on 2017/4/20.
 //  Copyright © 2017年 UUPaotui. All rights reserved.
 //
 
-#import "GNRBELHelper.h"
+#import "GNRBLEHelper.h"
 
-@implementation GNRBELHelper
+@implementation GNRBLEHelper
 
 + (GNRPeripheral *)getNewMyPeripheral:(CBPeripheral *)per{
     GNRPeripheral * perModel= nil;

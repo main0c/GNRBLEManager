@@ -1,5 +1,5 @@
 //
-//  GNRBELHelper.h
+//  GNRBLEHelper.h
 //  BlueToothDemo
 //
 //  Created by LvYuan on 2017/4/20.
@@ -7,9 +7,9 @@
 //
 
 #import <Foundation/Foundation.h>
-#import "GNRBELHeader.h"
+#import "GNRBLEHeader.h"
 
-@interface GNRBELHelper : NSObject
+@interface GNRBLEHelper : NSObject
 
 + (GNRPeripheral *)getNewMyPeripheral:(CBPeripheral *)per;
 

@@ -17,9 +17,9 @@
  7. 断开连接(disconnect)
  */
 
-#import "GNRBELCentralManager.h"
+#import "GNRBLECentralManager.h"
 
-@interface GNRBELCentralManager ()<CBCentralManagerDelegate,CBPeripheralDelegate>
+@interface GNRBLECentralManager ()<CBCentralManagerDelegate,CBPeripheralDelegate>
 
 @property (nonatomic, strong)NSMutableArray <CBUUID *>* serivices;//当前搜索的serviceUUIDs
 @property (nonatomic, strong)CBCentralManager * centralManager;//设备中心管理者
@@ -27,10 +27,10 @@
 
 @end
 
-@implementation GNRBELCentralManager
+@implementation GNRBLECentralManager
 
 + (instancetype)manager{
-    static GNRBELCentralManager *manager = nil;
+    static GNRBLECentralManager *manager = nil;
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
         manager = [[self alloc] init];
@@ -59,8 +59,8 @@
 
 //扫描
 - (instancetype)starScanPeripheralForServices:(NSArray <NSString *>*)services
-                                       succee:(GNRBELScanSucceeBlock)block
-                                        error:(GNRBELScanErrorBlock)errorBlock{
+                                       succee:(GNRBLEScanSucceeBlock)block
+                                        error:(GNRBLEScanErrorBlock)errorBlock{
     _scanBlock = nil;
     _scanBlock = [block copy];
     _errorBlock = nil;
@@ -87,7 +87,7 @@
 
 //链接该设备
 - (instancetype)connectForPeripheral:(GNRPeripheral *)peripheral
-                          completion:(GNRBELConnectBlock)connectBlock{
+                          completion:(GNRBLEConnectBlock)connectBlock{
     _connectBlock = nil;
     _connectBlock = [connectBlock copy];
     if (peripheral.peripheral) {
@@ -100,7 +100,7 @@
  读取特征值
  */
 - (instancetype)readValueForPeripheral:(GNRPeripheral *)peripheral
-                    completion:(GNRBELReadCharacteristicCompletion)completion;{
+                    completion:(GNRBLEReadCharacteristicCompletion)completion;{
     _readValueCompletion = nil;
     _readValueCompletion = [completion copy];
     GNRCharacteristic * chara = [peripheral.serviceStore characteristicForServiceUUID:peripheral.checkServiceUUID characteristicUUID:peripheral.checkCharaUUID];
@@ -126,7 +126,7 @@
 
 //订阅该设备的通知
 - (instancetype)notifyPeripheral:(GNRPeripheral *)per
-                      completion:(GNRBELNotifyCompletion)notifyCompletion{
+                      completion:(GNRBLENotifyCompletion)notifyCompletion{
     _notifyCompletion = nil;
     _notifyCompletion = [notifyCompletion copy];
     [self setNotifyValue:YES peripheral:per];
@@ -217,7 +217,7 @@
     if ([peripheral.name hasPrefix:NamePrefix_Peripheral]&&//名字有指定的前缀
         ![self containsPerModel:peripheral]&&//缓存中不存在
         peripheral) {//peripheral 不为nil
-        GNRPeripheral * perModel = [GNRBELHelper getNewMyPeripheral:peripheral];
+        GNRPeripheral * perModel = [GNRBLEHelper getNewMyPeripheral:peripheral];
         [self.peripherals addObject:perModel];
         if (_scanBlock) {
             _scanBlock(self.peripherals);
